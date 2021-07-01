@@ -4,9 +4,10 @@
 """BufferWorkSpace module."""
 
 import os
-
+from io import BytesIO
 new_lines = ["\r\n", "\n", "\r"]
-new_lines_bytes = [n.encode("ascii") for n in new_lines]  # we only support encodings that's backward compat with ascii
+# we only support encodings that's backward compat with ascii
+new_lines_bytes = [n.encode("ascii") for n in new_lines]
 
 
 class BufferWorkSpace:
@@ -22,7 +23,8 @@ class BufferWorkSpace:
             initialized to be just past the end of file.
         """
         self.fp = fp
-        self.read_position = _get_file_size(self.fp)  # set the previously read position to the
+        # set the previously read position to the
+        self.read_position = _get_file_size(self.fp)
         self.read_buffer = None
         self.chunk_size = chunk_size
 
@@ -78,7 +80,8 @@ class BufferWorkSpace:
     def read_until_yieldable(self):
         """Read in additional chunks until it is yieldable."""
         while not self.yieldable():
-            read_content, read_position = _get_next_chunk(self.fp, self.read_position, self.chunk_size)
+            read_content, read_position = _get_next_chunk(
+                self.fp, self.read_position, self.chunk_size)
             self.add_to_buffer(read_content, read_position)
 
     def has_returned_every_line(self):
@@ -89,6 +92,12 @@ class BufferWorkSpace:
 
 
 def _get_file_size(fp):
+    if isinstance(fp, BytesIO):
+        cur = fp.tell()
+        pos = fp.seek(0, os.SEEK_END)
+        fp.seek(cur, 0)
+        return pos
+
     return os.fstat(fp.fileno()).st_size
 
 
@@ -103,7 +112,8 @@ def _get_next_chunk(fp, previously_read_position, chunk_size):
     Returns:
         (bytestring, int): data that has been read in, the file pointer position where the data has been read from
     """
-    seek_position, read_size = _get_what_to_read_next(fp, previously_read_position, chunk_size)
+    seek_position, read_size = _get_what_to_read_next(
+        fp, previously_read_position, chunk_size)
     fp.seek(seek_position)
     read_content = fp.read(read_size)
     read_position = seek_position
