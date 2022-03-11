@@ -9,7 +9,7 @@ import os
 from .buffer_work_space import BufferWorkSpace
 
 # any encodings that are backward compatible with ascii should work
-supported_encodings = ["utf-8", "ascii", "latin-1"]
+supported_encodings = ["utf-8", "ascii", "latin-1", "utf_8"]
 
 
 class FileReadBackwards:
